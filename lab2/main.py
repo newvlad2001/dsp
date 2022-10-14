@@ -1,10 +1,11 @@
-import numpy as np
 import matplotlib.pyplot as plt
 from math import sin, cos, pi, sqrt
 
+STANDARD_AQV = 0.707
+STANDARD_AMPL = 1
 N = 1024
 K = N // 4
-phase = pi / 16
+PHASE = pi / 16
 
 fig = plt.figure(figsize=(20, 10), dpi=100)
 spec = fig.add_gridspec(1, 2)
@@ -21,7 +22,7 @@ def f(x):
 
 
 def f2(x):
-    return sin(2 * pi * x / N + phase)
+    return sin(2 * pi * x / N + PHASE)
 
 
 def get_aqv_v1(M, function):
@@ -40,13 +41,6 @@ def get_aqv_v2(M, function):
     return sqrt(sum_1 / (M + 1) - (sum_2 / (M + 1)) ** 2)
 
 
-def get_ampl_py(M, function):
-    y = [function(i) for i in range(M)]
-    fft = np.fft.fft(y)
-    amplitudes = (2 / M) * np.abs(fft)
-    return max(amplitudes)
-
-
 def get_ampl(M, function):
     cos_sum = 0
     sin_sum = 0
@@ -59,25 +53,17 @@ def get_ampl(M, function):
 
 
 def build(function, axes):
-    x = []
     d_1s = []
     d_2s = []
     d_as = []
-    for M in range(K, 2 * N):
+    x = range(K, 2 * N)
+    for M in x:
         x_aqv_1 = get_aqv_v1(M, function)
         x_aqv_2 = get_aqv_v2(M, function)
         a = get_ampl(M, function)
-        d_1 = 0.707 - x_aqv_1
-        d_2 = 0.707 - x_aqv_2
-        d_a = 1 - a
-        # print("-----------")
-        # print(f"x_aqv_1: {x_aqv_1}")
-        # print(f"x_aqv_2: {x_aqv_2}")
-        # print(f"A: {a}")
-        # print(f"d_1: {d_1}")
-        # print(f"d_2: {d_2}")
-        # print(f"d_a: {d_a}")
-        x.append(M)
+        d_1 = STANDARD_AQV - x_aqv_1
+        d_2 = STANDARD_AQV - x_aqv_2
+        d_a = STANDARD_AMPL - a
         d_1s.append(d_1)
         d_2s.append(d_2)
         d_as.append(d_a)
